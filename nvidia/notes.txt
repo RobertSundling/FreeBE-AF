@@ -1,0 +1,90 @@
+
+	     ______             ____  ______     _____  ______ 
+	    |  ____|           |  _ \|  ____|   / / _ \|  ____|
+	    | |__ _ __ ___  ___| |_) | |__     / / |_| | |__ 
+	    |  __| '__/ _ \/ _ \  _ <|  __|   / /|  _  |  __|
+	    | |  | | |  __/  __/ |_) | |____ / / | | | | |
+	    |_|  |_|  \___|\___|____/|______/_/  |_| |_|_|
+
+
+		    NVidia driver implementation notes.
+
+
+
+   This driver should in theory support both the NVidia Riva 128 and Riva 
+   TNT cards, but it has only been tested on the TNT. I'd be very interested 
+   to hear whether it works on the 128 or not, although I'm afraid there 
+   isn't much I can do to fix any problems on hardware that I don't own.
+
+   This driver doesn't work properly under Windows. It will run ok, but 
+   after using it, you can't switch back to your Windows desktop. I have no 
+   idea why this is.
+
+   It supports color depths of 8, 16, and 32 bits per pixel in both linear 
+   and banked modes, and resolutions of 320x200, 320x240, 320x400, 640x400, 
+   640x480, 800x600, 1024x768, and 1280x1024 (this last not in 32 bit mode). 
+   Other modes can easily be added if you know the register values for them.
+
+   It provides accelerated versions of the VBE/AF functions:
+
+      DrawScan()
+      DrawRect()
+      DrawTrap()
+      PutMonoImage()
+      BitBlt()
+      SetCursor()
+      SetCursorPos()
+      SetCursorColor()
+      ShowCursor()
+
+   Patterned drawing is not accelerated. I have some routines that sort-of 
+   worked for this, but couldn't get them to do the right thing in all the 
+   possible drawing modes. Since I got that code from an alpha version of an 
+   XFree86 driver which itself doesn't do patterned modes properly, this is 
+   not exactly surprising. I'll add that acceleration as soon as I get some 
+   decent info about how it works.
+
+   This driver is unable to use more than 16 meg of video memory, because 
+   I'm unable to detect the amount of vram until after I map the 
+   framebuffer, at which point it is too late to request a larger memory 
+   block.
+
+   The hardware scrolling and bank switching code may not be entirely 
+   correct, because I didn't have any docs for how the bank switch system 
+   works, and the scrolling routine supplied in XFree86 is broken. The code 
+   in this driver works correctly on my TNT, but your mileage may vary.
+
+   This driver does not implement the FreeBE/AF farptr extension mechanism, 
+   which means that it only works with nearptrs enabled. This could be 
+   altered if enough people feel strongly about it, but would be a 
+   considerable pain because I'd have to rewrite most of the NVidia helper 
+   routines as well as my own driver code.
+
+   This code is heavily based on the NVidia driver from XFree86 version 
+   3.3.3.1. In particular, the source file riva_hw.c was copied directly 
+   from XFree86. This imposes two restrictions on me. First, I have to say 
+   that NVidia is an exceptionally cool company, and they deserve much 
+   congratulation for releasing this nice bit of reusable driver source. 
+   Also, to comply with their BSD-style licensing terms, I have to reproduce 
+   this lovely little message:
+
+      Copyright 1993-1998 NVIDIA, Corporation. All rights reserved.
+
+      NVIDIA, CORPORATION MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF 
+      THIS SOURCE CODE FOR ANY PURPOSE. IT IS PROVIDED "AS IS" WITHOUT 
+      EXPRESS OR IMPLIED WARRANTY OF ANY KIND. NVIDIA, CORPORATION DISCLAIMS 
+      ALL WARRANTIES WITH REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED 
+      WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A 
+      PARTICULAR PURPOSE. IN NO EVENT SHALL NVIDIA, CORPORATION BE LIABLE 
+      FOR ANY SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, OR 
+      ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, 
+      WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, 
+      ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS 
+      SOURCE CODE.
+
+   Also thanks to Salvador Eduardo Tropea for the VGA mode setting routines 
+   in his TGUI driver, which I shamelessly copied.
+
+
+   By Shawn Hargreaves
+   shawn@talula.demon.co.uk
